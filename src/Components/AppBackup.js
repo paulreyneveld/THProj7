@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
+import logo from './logo.svg';
 import './App.css';
 
 // Routing import
 import {
   BrowserRouter,
   Route, 
-  Switch,
-  Redirect,   
+  Switch   
 } from 'react-router-dom';
 
 // Axios Import
@@ -17,39 +17,42 @@ import axios from 'axios';
 import apiKey from './config.js';
 
 // Component imports
+import Test from './Components/Test';
 import Nav from './Components/Nav';
+import Photo from './Components/Photo';
 import NotFound from './Components/NotFound';
 import SearchForm from './Components/SearchForm';
 import PhotoContainer from './Components/PhotoContainer';
 
 export class App extends Component {
-  // Initializes state placeholders/defaults.
+  
   constructor() {
     super();
     this.state = {
-      searchedImages: [],
       dogImages: [],
       waterfallImages: [],
       sunsetImages: [],
+      searchedImages: []
     };
   }
 
   componentDidMount() {
-
-    // The following requests pull data from the API for the statically rendered image datasets.  
     axios.get(`https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${apiKey}&tags=dog&per_page=24&format=json&nojsoncallback=1`)
-    .then(response => {
-      this.setState({
-        dogImages: response.data.photos.photo
-      });
+      .then(response => {
+        console.log(response);
+        this.setState({
+          dogImages: response.data.photos.photo
+        });
     })
-    .catch(error => {
-      console.log('Error fetching and parsing data', error);
+      .catch(error => {
+        console.log('Error fetching and parsing data', error);
     });
+
     axios.get(`https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${apiKey}&tags=waterfall&per_page=24&format=json&nojsoncallback=1`)
-    .then(response => {
-      this.setState({
-        waterfallImages: response.data.photos.photo
+      .then(response => {
+        console.log(response);
+        this.setState({
+          waterfallImages: response.data.photos.photo
       });
     })
     .catch(error => {
@@ -57,23 +60,25 @@ export class App extends Component {
     });
 
     axios.get(`https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${apiKey}&tags=sunset&per_page=24&format=json&nojsoncallback=1`)
-    .then(response => {
-      this.setState({
-        sunsetImages: response.data.photos.photo
+      .then(response => {
+        console.log(response);
+        this.setState({
+          sunsetImages: response.data.photos.photo
       });
-    })
-    .catch(error => {
-      console.log('Error fetching and parsing data', error);
+      })
+      .catch(error => {
+        console.log('Error fetching and parsing data', error);
     });
-
+  
   }
-
-  performSearch = (query) => {
+  
+  performSearch = (query = 'dogs') => {
     axios.get(`https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${apiKey}&tags=${query}&per_page=24&format=json&nojsoncallback=1`)
     .then(response => {
+      console.log(response);
       this.setState({
-        searchedImages: response.data.photos.photo,
-      });
+        searchedImages: response.data.photos.photo
+    });
     })
     .catch(error => {
       console.log('Error fetching and parsing data', error);
@@ -81,36 +86,44 @@ export class App extends Component {
   }
 
   render() {  
+    
     return (
      <BrowserRouter>
         <div className="App">
-          <SearchForm onSearch={this.performSearch} />
-          <Nav />  
-          <Switch>
-            <Route exact path="/" render={ () => 
-                <Redirect to="/dogs" />
+        <Route exact path="/" render={ () => 
+            <SearchForm onSearch={this.performSearch} />
+            <Nav />
+              <PhotoContainer
+                data={this.state.searchedImages}
+              />
             }/>
+          
+          <Switch>
 
             <Route path="/dogs" render={ () => 
-                <PhotoContainer
-                  data={this.state.dogImages}
-                />
+            <SearchForm onSearch={this.performSearch} />
+            <Nav />            
+              <PhotoContainer
+                data={this.state.dogImages}
+              />
             }/>
+
             <Route path="/waterfalls" render={ () => 
-                <PhotoContainer
-                  data={this.state.waterfallImages}
-                />
-            }/>          
-            <Route path="/sunsets" render={ () => 
-                <PhotoContainer
-                  data={this.state.sunsetImages}
-                />
+             <SearchForm onSearch={this.performSearch} />
+            <Nav />           
+              <PhotoContainer
+                data={this.state.waterfallImages}
+              />
             }/>
-            <Route path="/search/:query" render={ () => 
-                <PhotoContainer
-                  data={this.state.searchedImages}
-                />
-            }/>                   
+
+            <Route path="/sunsets" render={ () => 
+            <SearchForm onSearch={this.performSearch} />
+            <Nav />
+              <PhotoContainer
+                data={this.state.sunsetImages}
+              />
+            }/>
+
             <Route component={NotFound} />
           </Switch>
         </div>
