@@ -33,56 +33,30 @@ export class App extends Component {
       sunsetImages: [],
     };
   }
-
+  
+  // Obtains API information on app start
   componentDidMount() {
-
-    // The following requests pull data from the API for the statically rendered image datasets.  
-    axios.get(`https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${apiKey}&tags=dog&per_page=24&format=json&nojsoncallback=1`)
-    .then(response => {
-      this.setState({
-        dogImages: response.data.photos.photo
-      });
-    })
-    .catch(error => {
-      console.log('Error fetching and parsing data', error);
-    });
-    axios.get(`https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${apiKey}&tags=waterfall&per_page=24&format=json&nojsoncallback=1`)
-    .then(response => {
-      this.setState({
-        waterfallImages: response.data.photos.photo
-      });
-    })
-    .catch(error => {
-      console.log('Error fetching and parsing data', error);
-    });
-
-    axios.get(`https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${apiKey}&tags=sunset&per_page=24&format=json&nojsoncallback=1`)
-    .then(response => {
-      this.setState({
-        sunsetImages: response.data.photos.photo
-      });
-    })
-    .catch(error => {
-      console.log('Error fetching and parsing data', error);
-    });
-
+    this.performSearch('dogs', 'dogImages');
+    this.performSearch('waterfalls', 'waterfallImages');
+    this.performSearch('sunsets', 'sunsetImages');
   }
 
-  performSearch = (query) => {
+  // Generic Axios request to update state
+  performSearch = (query, keyState = 'searchedImages') => {
     axios.get(`https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=${apiKey}&tags=${query}&per_page=24&format=json&nojsoncallback=1`)
     .then(response => {
       this.setState({
-        searchedImages: response.data.photos.photo,
+        [keyState]: response.data.photos.photo
       });
     })
     .catch(error => {
       console.log('Error fetching and parsing data', error);
-  });  
+    });  
   }
 
   render() {  
     return (
-     <BrowserRouter>
+      <BrowserRouter>
         <div className="App">
           <SearchForm onSearch={this.performSearch} />
           <Nav />  
